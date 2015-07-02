@@ -1,0 +1,40 @@
+---
+# Copyright (C) 2015 PSP2SDK Project
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/devkitPro
+
+before_install:
+ - set -e
+ - curl -Ls https://download.sourceforge.net/devkitpro/devkitARMupdate.pl | perl
+
+script:
+ - export FILE=psp2-libs-dirty-$(git describe --always).zip
+
+ - aclocal
+ - automake --add-missing
+ - autoconf
+
+ - ./configure -q --host=arm-none-eabi --with-silent-rules --prefix="$PREFIX"
+ - make install -j4
+
+ - cd $PREFIX
+ - zip -0rq $FILE *
+
+after_success:
+ - curl -q -T $FILE -u $FTP ftp://wololo.net/
+
+env:
+ global:
+  - DEVKITPRO="$HOME/devkitPro"
+  - DEVKITARM="$DEVKITPRO/devkitARM"
+  - PATH="$PATH:$DEVKITARM/bin"
+  - PREFIX="$PWD/dist"
+  - secure: "bnn11K/a1bmgAcnPiWDpsvVrpD7vzmkdwq/KK6VI3ML2kab72OZl/nsAHZo+dDvdlvI+A0HDg++J/YQENP+YbhPzwCuMiDN6W2kRukm9FKaP5UsyWe3TlosmpdcmQtvAxRjOkuLAPEdgxexjaYJ0lvyYodg794fo99HFPd3U8Xr/LRzt3EvbnPw5KQT1DrYPkXJtcB8agQmSNBkUcT80aspDf3pjjz/EyzMHRorJuWjPAyPA520yTQtnxl5hIzD3jTlk6fZoHWDWkBR4TTsPqdsnclCdQCtxb7lYcmCn1GQzN9oKsFT/NHA2e1VW/2ndIJf5FGDQXtG40Mrky7qQI195EyBj3J30kQX2FNkufZA9bm388thTf2Xw2wG3wgKNPa0yUP2j/TuZAJUxBnixDyA8jJQKSz1JSAmnH/fZwOvHtzP9kYqa7+NYGMSZ6aD+TXxRKV11D954hP2Hbs/WcMj5+CZuBGEvRZ9lMR9Eh82HY0Q4JbGSHR4Kjydfizp9uGwk4ckhrdK/28wj5X9HewEQJxz75OGxz401pnUkGItDbSvb+h7c0nqqC0Yg+i9eZ2ibti0koToM9Dbea/z4DgqvjIg3WZE3j4SygKjaxo/efowmmfsngnlxEtY3oqnLsBAqTuXQxJXREX625EXQ3zFZNb5LObFCxjCyPnzjSkE="
