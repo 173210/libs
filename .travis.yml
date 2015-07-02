@@ -18,7 +18,7 @@ before_install:
  - git config user.name "Travis CI"
  - git config user.email contact@travis-ci.com
  - git clone -q --single-branch "https://$TOKEN@github.com/psp2dev/psp2dev.github.io" html
- - git -C html rm -rf *
+ - git -C html rm -rf .
 
 script:
  - export REV=$(git describe --always)
