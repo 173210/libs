@@ -15,21 +15,34 @@ before_install:
  - set -e
  - curl -Ls https://download.sourceforge.net/devkitpro/devkitARMupdate.pl | perl
 
+ - git config user.name "Travis CI"
+ - git config user.email contact@travis-ci.com
+ - git clone -q --single-branch "https://$TOKEN@github.com/psp2dev/psp2dev.github.io" html
+ - git -C html rm -Rf *
+
 script:
- - export FILE=psp2-libs-dirty-$(git describe --always).zip
+ - export REV=$(git describe --always)
+ - export FILE=psp2-libs-dirty-$REV.zip
 
  - aclocal
  - automake --add-missing
  - autoconf
 
  - ./configure -q --host=arm-none-eabi --with-silent-rules --with-multilib=$PWD --prefix="$PREFIX"
+ - doxygen
  - make install -j4
 
- - cd $PREFIX
+ - pushd $PREFIX
  - zip -0rq $FILE *
 
 after_success:
  - curl -q -T $FILE -u $FTP ftp://wololo.net/
+ - popd
+
+ - cd html
+ - git add -f .
+ - git commit --amend -am "Deploy $REV to Github Pages"
+ - git push -fq origin
 
 env:
  global:
@@ -38,3 +51,4 @@ env:
   - PATH="$PATH:$DEVKITARM/bin"
   - PREFIX="$PWD/dist"
   - secure: "bnn11K/a1bmgAcnPiWDpsvVrpD7vzmkdwq/KK6VI3ML2kab72OZl/nsAHZo+dDvdlvI+A0HDg++J/YQENP+YbhPzwCuMiDN6W2kRukm9FKaP5UsyWe3TlosmpdcmQtvAxRjOkuLAPEdgxexjaYJ0lvyYodg794fo99HFPd3U8Xr/LRzt3EvbnPw5KQT1DrYPkXJtcB8agQmSNBkUcT80aspDf3pjjz/EyzMHRorJuWjPAyPA520yTQtnxl5hIzD3jTlk6fZoHWDWkBR4TTsPqdsnclCdQCtxb7lYcmCn1GQzN9oKsFT/NHA2e1VW/2ndIJf5FGDQXtG40Mrky7qQI195EyBj3J30kQX2FNkufZA9bm388thTf2Xw2wG3wgKNPa0yUP2j/TuZAJUxBnixDyA8jJQKSz1JSAmnH/fZwOvHtzP9kYqa7+NYGMSZ6aD+TXxRKV11D954hP2Hbs/WcMj5+CZuBGEvRZ9lMR9Eh82HY0Q4JbGSHR4Kjydfizp9uGwk4ckhrdK/28wj5X9HewEQJxz75OGxz401pnUkGItDbSvb+h7c0nqqC0Yg+i9eZ2ibti0koToM9Dbea/z4DgqvjIg3WZE3j4SygKjaxo/efowmmfsngnlxEtY3oqnLsBAqTuXQxJXREX625EXQ3zFZNb5LObFCxjCyPnzjSkE="
+  - secure: "CnKSS3cvZC0/cEyfcZdtPZbhj0MBHIhx326mpf2fX9mYTUPApwSQOhOTvJaWDquxc0swDK0t4Qg4CZh9CwIDU73DpZPxa2mAb9F6QTQd709spqBoGCTn5xpYZG2tAmBnVXRQpEsPrNDhRTuk0svPmmyqemy2JOrAsOkyqtXJUjv2SON6bvgXsU7RLnoeJR7X2KCqo0x4sNkG64YBkWRbP3IaBwY9Il74l143gplizJXo+DXrt5Rk/m4SPIFyH2QSpXHLeivIDILZQ1TvdhI7g2IXrpuquNj56UA0T32VAJQ3cDtutoHRzFdKQqh0Bd4AIkf5Q1E7Wf0yCFJvPiuGtFp4AQsU51dpFkDjfDa3xUhnJ2Uj31w18zYWhE0+qLUee6PWQwyYcNgD2fTlciZQg/cp9Cfwz8krmsy8PPikveiEtW3JFcpvYcs4d6VkMdJ4r9puL00G7YkAaelI3HWDCSfZy7/CQD03Dyu+Vegqers0LokI/vS8E8c4JpbISyoN3i+eeuByxkRGoJkLmLIYsfBx8yEcybAjIZQ0evlAWTNjie9+7Ps0cP+WMu5Tcc8AHjxFe/nxC0x2PkvFdwvA2p2nbIHsZxxszSDLmk9bYb0OZpgKqMOm3SWXeGrTr8VOybuaxYvpo/lAYeZV23V9qRWE4SHbv0M6gtfB4z53FDY="
