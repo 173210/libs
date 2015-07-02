@@ -22,7 +22,7 @@ script:
  - automake --add-missing
  - autoconf
 
- - ./configure -q --host=arm-none-eabi --with-silent-rules --prefix="$PREFIX"
+ - ./configure -q --host=arm-none-eabi --with-silent-rules --with-multilib=$PWD --prefix="$PREFIX"
  - make install -j4
 
  - cd $PREFIX
